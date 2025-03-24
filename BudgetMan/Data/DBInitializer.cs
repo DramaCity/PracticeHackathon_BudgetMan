@@ -7,37 +7,72 @@ namespace BudgetMan.Data
 {
     public static class DBInitializer
     {
-        public static async Task Initialize(ApplicationDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task Initialize(ApplicationDbContext context, 
+                                         UserManager<User> userManager, 
+                                         RoleManager<IdentityRole> roleManager)
         {
-            context.Database.EnsureCreated();
-            if (!await roleManager.Roles.AnyAsync())
+            // 1. Vérification et création des rôles
+            foreach (var role in Enum.GetNames(typeof(Role)))
             {
-                await roleManager.CreateAsync(new IdentityRole(Role.Admin.ToString()));
-                await roleManager.CreateAsync(new IdentityRole(Role.User.ToString()));
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                    Console.WriteLine($"Rôle créé : {role}");
+                }
             }
-            if (!await userManager.Users.AnyAsync())
+
+            // 2. Création de l'admin avec gestion d'erreur
+            var adminEmail = "budgetmanadmin@hotmail.com";
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
                 var admin = new User
                 {
                     UserName = "admin",
-                    Email = "budgetmanadmin@hotmail.com",
+                    Email = adminEmail,
+                    EmailConfirmed = true,  // Important pour bypasser la vérification
                     FirstName = "Ad",
                     LastName = "Min",
                     Country = "Canada"
                 };
-                await userManager.CreateAsync(admin, "Password123");
-                await userManager.AddToRoleAsync(admin, Role.Admin.ToString());
 
+                var createAdmin = await userManager.CreateAsync(admin, "Password123!");
+                
+                if (createAdmin.Succeeded)
+                {
+                    Console.WriteLine("Admin créé avec succès");
+                    await userManager.AddToRoleAsync(admin, Role.Admin.ToString());
+                }
+                else
+                {
+                    Console.WriteLine($"Erreur création admin: {string.Join(", ", createAdmin.Errors)}");
+                }
+            }
+
+            // 3. Création de l'utilisateur test
+            var userEmail = "budgetmanusertest@hotmail.com";
+            if (await userManager.FindByEmailAsync(userEmail) == null)
+            {
                 var user = new User
                 {
                     UserName = "usertest",
-                    Email = "budgetmanusertest@hotmail.com",
+                    Email = userEmail,
+                    EmailConfirmed = true,
                     FirstName = "User",
                     LastName = "Test",
                     Country = "Canada"
                 };
-                await userManager.CreateAsync(user, "Password123");
-                await userManager.AddToRoleAsync(user, Role.User.ToString());
+
+                var createUser = await userManager.CreateAsync(user, "Password123!");
+                
+                if (createUser.Succeeded)
+                {
+                    Console.WriteLine("Utilisateur test créé avec succès");
+                    await userManager.AddToRoleAsync(user, Role.User.ToString());
+                }
+                else
+                {
+                    Console.WriteLine($"Erreur création utilisateur: {string.Join(", ", createUser.Errors)}");
+                }
             }
         }
     }
