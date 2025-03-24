@@ -23,9 +23,10 @@ namespace BudgetMan.Data
                     Email = "budgetmanadmin@hotmail.com",
                     FirstName = "Ad",
                     LastName = "Min",
-                    Country = "Canada"
+                    Country = "Canada",
+                    Avatar = "admin.png"
                 };
-                await userManager.CreateAsync(admin, "Password123");
+                await userManager.CreateAsync(admin, "Password123!");
                 await userManager.AddToRoleAsync(admin, Role.Admin.ToString());
 
                 var user = new User
@@ -34,9 +35,10 @@ namespace BudgetMan.Data
                     Email = "budgetmanusertest@hotmail.com",
                     FirstName = "User",
                     LastName = "Test",
-                    Country = "Canada"
+                    Country = "Canada",
+                    Avatar = "user1.png"
                 };
-                await userManager.CreateAsync(user, "Password123");
+                await userManager.CreateAsync(user, "Password123!");
                 await userManager.AddToRoleAsync(user, Role.User.ToString());
             }
         }
