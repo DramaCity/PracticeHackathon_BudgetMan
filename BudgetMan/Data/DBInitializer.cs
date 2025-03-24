@@ -9,12 +9,12 @@ namespace BudgetMan.Data
     {
         public static async Task Initialize(ApplicationDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
-            context.Database.EnsureCreated();
             if (!await roleManager.Roles.AnyAsync())
             {
                 await roleManager.CreateAsync(new IdentityRole(Role.Admin.ToString()));
                 await roleManager.CreateAsync(new IdentityRole(Role.User.ToString()));
             }
+
             if (!await userManager.Users.AnyAsync())
             {
                 var admin = new User
